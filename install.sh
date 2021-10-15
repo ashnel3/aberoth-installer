@@ -134,7 +134,7 @@
     fi
 
     # Start install
-    mkdir -p $installdir/aberoth && cd $1aberoth \
+    mkdir -p $installdir/aberoth && cd $installdir/aberoth \
         && install_download_client "$installdiraberoth" \
         && install_download_icon "$installdiraberoth" \
         && install_write_start_script "$java_8" \
