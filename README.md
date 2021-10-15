@@ -9,4 +9,4 @@ Multiplatform installer for the 8-bit mmorpg Aberoth
 
 **MacOs w/ homebrew:** `brew install openjdk@8`
 
-**Install script:** `bash <(curl -o- https://raw.githubusercontent.com/ashnel3/aberoth-installer/main/install.sh)`
+**Install script:** ```bash <(curl -o- https://raw.githubusercontent.com/ashnel3/aberoth-installer/main/install.sh)```
