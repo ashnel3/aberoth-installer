@@ -95,38 +95,34 @@
         esac
     }
 
+    # Main
+    installdir=~/.aberoth/
     platform="$(install_get_platform)"
     java_8=""
 
-    if [[ ! -d $1 ]]; then
-        install_error "Error: no path specified!"
-        exit 1
+    if [[ ! -z $1 ]]; then
+        installdir="$1/.aberoth"
     fi
 
     # Prompt to install
-    install_prompt "  + Install aberoth to \"$1aberoth\"?" \
+    install_prompt "  + Install aberoth to \"$installdir\"?" \
         && install_echo "  + Searching for Java 8..." \
         || exit 0
 
     # Search for Java 8
-    if [[ ! -z $2 ]]; then
-        java_8="$2"
-    else
-        locations=(java "$JAVA_HOME/bin/java")
-
-        # Potential Java locations
-        if [[ "$(echo /usr/lib/jvm/java-*/bin/java)" != "/usr/lib/jvm/java-*/bin/java" ]]; then
-            locations+=("$(echo /usr/lib/jvm/java-*/bin/java)")
-        fi
-
-        for p in ${locations[@]}; do
-            install_is_java_8 "$p" \
-                && install_prompt "  + Use Java 8 located at: \"$p\"?" \
-                && java_8="$p" \
-                && break
-        done
+    locations=(java "$JAVA_HOME/bin/java")
+    if [[ "$(echo /usr/lib/jvm/java-*/bin/java)" != "/usr/lib/jvm/java-*/bin/java" ]]; then
+        locations+=("$(echo /usr/lib/jvm/java-*/bin/java)")
     fi
 
+    for p in ${locations[@]}; do
+        install_is_java_8 "$p" \
+            && install_prompt "  + Use Java 8 located at: \"$p\"?" \
+            && java_8="$p" \
+            && break
+    done
+
+    # Checks
     if [[ -z $java_8 ]]; then
         install_error "Error: failed to find Java 8!"
         exit 1
@@ -137,9 +133,10 @@
         exit 1
     fi
 
-    mkdir -p $1/aberoth && cd $1aberoth \
-        && install_download_client "$1aberoth" \
-        && install_download_icon "$1aberoth" \
+    # Start install
+    mkdir -p $installdir/aberoth && cd $1aberoth \
+        && install_download_client "$installdiraberoth" \
+        && install_download_icon "$installdiraberoth" \
         && install_write_start_script "$java_8" \
         && install_write_start_shortcut \
         && install_echo "Done!"
