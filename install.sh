@@ -13,10 +13,6 @@
         type "$1" > /dev/null 2>&1
     }
 
-    install_get_platform() {
-        install_echo "linux"
-    }
-
     install_is_java_8() {
         local java_version=$($1 -version 2>&1 | grep -m 1 -Po '\d+\.\d+\.\d+')
 
@@ -40,7 +36,7 @@
             install_echo "1. ) [128x128] Low res scaled - Recommended. Same as low res but scaled. (requires imagemagik)"
             install_echo "2. ) [16x16]   Low res logo   - The OG logo, super blurry without scaling."
             # install_echo "3. ) [128x128] Default logo   - The new logo, meh..."
-            read -p "Choose logo (1-3): " -n 1 -r
+            read -p "Choose logo (1-2): " -n 1 -r
             install_echo ""
 
             case "$REPLY" in
@@ -71,18 +67,45 @@
             && curl -O --progress-bar https://aberoth.com/resource/Aberoth.jar
     }
 
-    install_write_start_script() {
-        install_echo '#!/usr/bin/env bash' >> start.sh
-        install_echo '' >> start.sh
-        install_echo 'cd "$(dirname "$0")"' >> start.sh
-        install_echo '' >> start.sh
-        install_echo "$1 -jar Aberoth.jar" >> start.sh
-        chmod +x Aberoth.jar start.sh
+    install_create_start_script() {
+        install_echo '#!/usr/bin/env bash'   >> start
+        install_echo ''                      >> start
+        install_echo 'cd "$(dirname "$0")"'  >> start
+        install_echo ''                      >> start
+        install_echo "$1 -jar Aberoth.jar &" >> start
+        chmod +x Aberoth.jar start
     }
 
-    # TODO: Create start menu shortcut
-    install_write_start_shortcut() {
+    install_create_gnome_menu_shortcut() {
+        local install_dir="$PWD"
+        local desktop_file="$HOME/.local/share/applications/Aberoth.desktop"
+
+        rm -f $desktop_file
+
+        install_echo '[Desktop Entry]'            >> $desktop_file
+        install_echo 'Type=Application'           >> $desktop_file
+        install_echo 'Name=Aberoth'               >> $desktop_file
+        install_echo "Exec=$install_dir/start %U" >> $desktop_file
+        install_echo "Icon=$install_dir/icon.png" >> $desktop_file
+        install_echo 'Categories=Game'            >> $desktop_file
+        install_echo 'Terminal=false'             >> $desktop_file
+        install_echo 'Comment=Free 8-Bit MMORPG'  >> $desktop_file
+        chmod +x $desktop_file
+    }
+
+    install_create_windows_menu_shortcut() {
         return 0
+    }
+
+    install_create_menu_shortcut() {
+        local USER="$(whoami)"
+        if install_has_command "desktop-file-validate"; then
+            install_create_gnome_menu_shortcut
+        elif [ -d "/c/Users/$USER/AppData/Roaming/Microsoft/Windows/Start Menu/Programs" ]; then
+            install_create_windows_menu_shortcut
+        else
+            install_error "  ! Error: failed to create menu shortcut!"
+        fi
     }
 
     install_prompt() {
@@ -97,7 +120,6 @@
 
     # Main
     installdir=~/.aberoth/
-    platform="$(install_get_platform)"
     java_8=""
 
     if [[ ! -z $1 ]]; then
@@ -134,10 +156,10 @@
     fi
 
     # Start install
-    mkdir -p $installdir/aberoth && cd $installdir/aberoth \
+    mkdir -p $installdir && cd $installdir \
         && install_download_client "$installdiraberoth" \
         && install_download_icon "$installdiraberoth" \
-        && install_write_start_script "$java_8" \
-        && install_write_start_shortcut \
+        && install_create_start_script "$java_8" \
+        && install_create_menu_shortcut \
         && install_echo "Done!"
 }
