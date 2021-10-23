@@ -80,7 +80,6 @@
 
         rm -f $desktop_file
 
-
         install_echo '[Desktop Entry]'            >> $desktop_file
         install_echo 'Type=Application'           >> $desktop_file
         install_echo 'Name=Aberoth'               >> $desktop_file
@@ -93,7 +92,18 @@
     }
 
     install_create_windows_menu_shortcut() {
-        return 0
+local vbs_script="$(cat << EOF
+Set oWS = WScript.CreateObject("WScript.Shell")
+Set oLink = oWS.CreateShortcut("..\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Aberoth.lnk")
+oLink.TargetPath = "%USERPROFILE%\.aberoth\Aberoth.jar"
+oLink.IconLocation = "%USERPROFILE%\.aberoth\icon.ico"
+oLink.Save
+EOF
+)"
+    install_echo "$vbs_script" >> "CreateShortcut.vbs" \
+        && cscript.exe CreateShortcut.vbs 2>/dev/null \
+        || install_error "  ! Error: failed to create menu shortcut!"
+    rm -f CreateShortcut.vbs
     }
 
     install_create_menu_shortcut() {
@@ -146,6 +156,7 @@
         locations+=("$(echo /c/Program\ Files/jdk*/bin/javaw.exe)")
     fi
 
+    # Loop over locations
     for p in ${locations[@]}; do
         install_is_java_8 "$p" \
             && install_prompt "  + Use Java 8 located at: \"$p\"?" \
@@ -158,7 +169,6 @@
         install_error "Error: failed to find Java 8!"
         exit 1
     fi
-
     if ! install_has_command "curl"; then
         install_error "Error: failed to find curl!"
         exit 1
