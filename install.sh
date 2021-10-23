@@ -6,7 +6,7 @@
     }
 
     install_error() {
-        >&2 install_echo "$@"
+        install_echo "$@" >&2
     }
 
     install_has_command() {
@@ -29,34 +29,32 @@
         return 1
     }
 
-    # TODO: Find new logo
+    # TODO: This kinda sucks
     install_download_icon() {
         install_echo "Choose an icon..."
         while true; do
-            install_echo "1. ) [128x128] Low res scaled - Recommended. Same as low res but scaled. (requires imagemagik)"
-            install_echo "2. ) [16x16]   Low res logo   - The OG logo, super blurry without scaling."
-            # install_echo "3. ) [128x128] Default logo   - The new logo, meh..."
-            read -p "Choose logo (1-2): " -n 1 -r
+            install_echo "1. ) [128x128] Low-Res Upscaled - Recommended. Same as Low-Res but scaled. (requires imagemagik)"
+            install_echo "2. ) [128x128] Steam logo       - The new logo"
+            install_echo "3. ) [16x16]   Low-Res logo     - The old logo, super blurry without scaling."
+            read -p "Choose logo (1-3): " -n 1 -r
             install_echo ""
 
             case "$REPLY" in
                 "" | 1 )
                     if install_has_command "convert"; then
-                        curl -O --progress-bar https://aberoth.com/favicon.ico
-                        convert favicon.ico -scale 800% icon.png
-                        rm -f favicon.ico
+                        curl --progress-bar -o icon.ico https://aberoth.com/favicon.ico \
+                            && convert icon.ico -scale 800% icon.ico
                         break
                     else
                         install_error "Error: Failed to find imagemagick!"
-                        exit 1
                     fi
                 ;;
                 2 )
-                    curl -O --progress-bar https://aberoth.com/favicon.ico
-                    mv favicon.ico icon.ico
+                    curl --progress-bar -o icon.ico \
+                        https://cdn.cloudflare.steamstatic.com/steamcommunity/public/images/apps/354200/579294a20da00a2e4b5c703a546f6a6d68604608.ico
                     break
                 ;;
-                # 3 ) curl -O ;;
+                3 ) curl --progress-bar --output icon.ico https://aberoth.com/favicon.ico; break ;;
                 * ) install_error "Please choose a number 1-3" ;;
             esac
         done
@@ -86,7 +84,7 @@
         install_echo 'Type=Application'           >> $desktop_file
         install_echo 'Name=Aberoth'               >> $desktop_file
         install_echo "Exec=$install_dir/start %U" >> $desktop_file
-        install_echo "Icon=$install_dir/icon.png" >> $desktop_file
+        install_echo "Icon=$install_dir/icon.ico" >> $desktop_file
         install_echo 'Categories=Game'            >> $desktop_file
         install_echo 'Terminal=false'             >> $desktop_file
         install_echo 'Comment=Free 8-Bit MMORPG'  >> $desktop_file
