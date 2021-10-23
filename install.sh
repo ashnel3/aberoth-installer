@@ -133,8 +133,17 @@
 
     # Search for Java 8
     locations=(java "$JAVA_HOME/bin/java")
+
+    # Ubuntu locations
     if [[ "$(echo /usr/lib/jvm/java-*/bin/java)" != "/usr/lib/jvm/java-*/bin/java" ]]; then
         locations+=("$(echo /usr/lib/jvm/java-*/bin/java)")
+    fi
+
+    # Windows locations
+    if [[ "$(echo /c/Program\ Files/jre*/bin/javaw.exe)" != '/c/Program\ Files/jre*/bin/javaw.exe' ]]; then
+        locations+=("$(echo /c/Program\ Files/jre*/bin/javaw.exe)")
+    elif [[ "$(echo /c/Program\ Files/jdk*/bin/javaw.exe)" != '/c/Program\ Files/jdk*/bin/javaw.exe' ]]; then
+        locations+=("$(echo /c/Program\ Files/jdk*/bin/javaw.exe)")
     fi
 
     for p in ${locations[@]}; do
