@@ -41,9 +41,16 @@
 
             case "$REPLY" in
                 "" | 1 )
-                    if install_has_command "convert"; then
+                    local imagemagick=""
+                    if install_has_command "magick"; then
+                        imagemagick="magick"
+                    elif install_has_command "convert" && ! install_has_command "convert.exe"; then
+                        imagemagick="convert"
+                    fi
+
+                    if [[ ! -z "$imagemagick" ]]; then
                         curl --progress-bar -o icon.ico https://aberoth.com/favicon.ico \
-                            && convert icon.ico -scale 800% icon.ico
+                            && command "$imagemagick" icon.ico -scale 800% icon.ico
                         break
                     else
                         install_error "Error: Failed to find imagemagick!"
@@ -92,7 +99,7 @@
     }
 
     install_create_windows_menu_shortcut() {
-local vbs_script="$(cat << EOF
+local vbs_createshortcut="$(cat << EOF
 Set oWS = WScript.CreateObject("WScript.Shell")
 Set oLink = oWS.CreateShortcut("..\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Aberoth.lnk")
 oLink.TargetPath = "%USERPROFILE%\.aberoth\Aberoth.jar"
@@ -100,7 +107,8 @@ oLink.IconLocation = "%USERPROFILE%\.aberoth\icon.ico"
 oLink.Save
 EOF
 )"
-    install_echo "$vbs_script" >> "CreateShortcut.vbs" \
+
+    install_echo "$vbs_createshortcut" >> "CreateShortcut.vbs" \
         && cscript.exe CreateShortcut.vbs 2>/dev/null \
         || install_error "  ! Error: failed to create menu shortcut!"
     rm -f CreateShortcut.vbs
@@ -108,6 +116,8 @@ EOF
 
     install_create_menu_shortcut() {
         local USER="$(whoami)"
+
+        install_echo "  - Creating menu shortcut..."
         if install_has_command "desktop-file-validate"; then
             install_create_gnome_menu_shortcut "$1"
         elif [ -d "/c/Users/$USER/AppData/Roaming/Microsoft/Windows/Start Menu/Programs" ]; then
@@ -150,9 +160,9 @@ EOF
     fi
 
     # Windows locations
-    if [[ "$(echo /c/Program\ Files/jre*/bin/javaw.exe)" != '/c/Program\ Files/jre*/bin/javaw.exe' ]]; then
+    if [[ "$(echo /c/Program\ Files/jre*/bin/javaw.exe)" != '/c/Program Files/jre*/bin/javaw.exe' ]]; then
         locations+=("$(echo /c/Program\ Files/jre*/bin/javaw.exe)")
-    elif [[ "$(echo /c/Program\ Files/jdk*/bin/javaw.exe)" != '/c/Program\ Files/jdk*/bin/javaw.exe' ]]; then
+    elif [[ "$(echo /c/Program\ Files/jdk*/bin/javaw.exe)" != '/c/Program Files/jdk*/bin/javaw.exe' ]]; then
         locations+=("$(echo /c/Program\ Files/jdk*/bin/javaw.exe)")
     fi
 
@@ -179,5 +189,5 @@ EOF
         && install_download_client "$installdiraberoth" \
         && install_download_icon "$installdiraberoth" \
         && install_create_menu_shortcut "$java_8" \
-        && install_echo "Done!"
+        && install_echo "  - Done!"
 }
