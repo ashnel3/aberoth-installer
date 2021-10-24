@@ -24,7 +24,7 @@
                 install_echo "  - Found Java v$java_version"
             fi
         else
-            install_echo "  - Nothing installed at $1"
+            install_echo "  ! Error: nothing installed at - \"$1\""
         fi
         return 1
     }
@@ -66,6 +66,7 @@
     }
 
     install_create_start_script() {
+        rm -f start
         install_echo '#!/usr/bin/env bash'   >> start
         install_echo ''                      >> start
         install_echo 'cd "$(dirname "$0")"'  >> start
@@ -79,7 +80,6 @@
         local desktop_file="$HOME/.local/share/applications/Aberoth.desktop"
 
         rm -f $desktop_file
-
         install_echo '[Desktop Entry]'            >> $desktop_file
         install_echo 'Type=Application'           >> $desktop_file
         install_echo 'Name=Aberoth'               >> $desktop_file
@@ -129,15 +129,15 @@ EOF
     }
 
     # Main
-    installdir=~/.aberoth/
+    install_dir=~/.aberoth/
     java_8=""
 
     if [[ ! -z $1 ]]; then
-        installdir="$1/.aberoth"
+        install_dir="$1/.aberoth/"
     fi
 
     # Prompt to install
-    install_prompt "  + Install aberoth to \"$installdir\"?" \
+    install_prompt "  + Install aberoth to \"$install_dir\"?" \
         && install_echo "  + Searching for Java 8..." \
         || exit 0
 
@@ -175,7 +175,7 @@ EOF
     fi
 
     # Start install
-    mkdir -p $installdir && cd $installdir \
+    mkdir -p $install_dir && cd $install_dir \
         && install_download_client "$installdiraberoth" \
         && install_download_icon "$installdiraberoth" \
         && install_create_menu_shortcut "$java_8" \
