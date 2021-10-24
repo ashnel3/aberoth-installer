@@ -1,12 +1,17 @@
 # aberoth-installer
-Multiplatform installer for the 8-bit mmorpg Aberoth
+Multi-platform installer for the 8-bit MMORPG Aberoth
 
-**Requires:** curl & java-8
+## Installation:
+Requires: curl, and java 8
 
-**Linux w/ apt:** `apt-get install curl openjdk-8-jre`
+**Install from script:**
+```bash
+bash <(curl -o- https://raw.githubusercontent.com/ashnel3/aberoth-installer/main/install.sh)
+```
 
-**Bsd w/ pkg:** `pkg install curl openjdk8-jre`
-
-**MacOs w/ homebrew:** `brew install openjdk@8`
-
-**Install script:** ```bash <(curl -o- https://raw.githubusercontent.com/ashnel3/aberoth-installer/main/install.sh)```
+**Install from source:**
+```bash
+git clone https://github.com/ashnel3/aberoth-installer.git
+cd aberoth-installer
+./install.sh $HOME
+```
