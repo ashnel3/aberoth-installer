@@ -14,8 +14,17 @@
     }
 
     install_is_java_8() {
-        local java_version=$($1 -version 2>&1 | grep -m 1 -Po '\d+\.\d+\.\d+')
+        local grep=""
+        if install_has_command "ggrep"; then
+            grep="ggrep"
+        elif install_has_command "grep"; then
+            grep="grep"
+        else
+            install_error '  ! Error: failed to find grep!'
+            exit 1
+        fi
 
+        local java_version=$($1 -version 2>&1 | $grep -m 1 -Po '\d+\.\d+\.\d+')
         if [[ ! -z $java_version ]]; then
             if [[ "1.8.0" =~ $java_version ]]; then
                 install_echo "  - Found Java v$java_version"
