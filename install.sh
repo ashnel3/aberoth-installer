@@ -163,6 +163,11 @@ EOF
     # Search for Java 8
     locations=(java "$JAVA_HOME/bin/java")
 
+    # AdoptOpenJDK locations
+    if [[ "$(echo /usr/lib/jvm/adoptopenjdk-*/bin/java)" != "/usr/lib/jvm/jdk-*/bin/java" ]]; then
+        locations+=("$(echo /usr/lib/jvm/adoptopenjdk-*/bin/java)")
+    fi
+
     # Ubuntu locations
     if [[ "$(echo /usr/lib/jvm/java-*/bin/java)" != "/usr/lib/jvm/java-*/bin/java" ]]; then
         locations+=("$(echo /usr/lib/jvm/java-*/bin/java)")
