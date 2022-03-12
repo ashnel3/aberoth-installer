@@ -25,7 +25,7 @@
         fi
 
         local java_version=$($1 -version 2>&1 | $grep -m 1 -Po '\d+\.\d+\.\d+')
-        if [[ ! -z $java_version ]]; then
+        if [[ -n "$java_version" ]]; then
             if [[ "1.8.0" =~ $java_version ]]; then
                 install_echo "  - Found Java v$java_version"
                 return 0
@@ -57,7 +57,7 @@
                         imagemagick="convert"
                     fi
 
-                    if [[ ! -z "$imagemagick" ]]; then
+                    if [[ -n "$imagemagick" ]]; then
                         curl --progress-bar -o icon.ico https://aberoth.com/favicon.ico \
                             && command "$imagemagick" icon.ico -scale 800% icon.ico
                         break
@@ -95,16 +95,16 @@
         local install_dir="$PWD"
         local desktop_file="$HOME/.local/share/applications/Aberoth.desktop"
 
-        rm -f $desktop_file
-        install_echo '[Desktop Entry]'            >> $desktop_file
-        install_echo 'Type=Application'           >> $desktop_file
-        install_echo 'Name=Aberoth'               >> $desktop_file
-        install_echo "Exec=$1 -jar $install_dir/Aberoth.jar" >> $desktop_file
-        install_echo "Icon=$install_dir/icon.ico" >> $desktop_file
-        install_echo 'Categories=Game'            >> $desktop_file
-        install_echo 'Terminal=false'             >> $desktop_file
-        install_echo 'Comment=Free 8-Bit MMORPG'  >> $desktop_file
-        chmod +x $desktop_file
+        rm -f "$desktop_file"
+        install_echo '[Desktop Entry]'            >> "$desktop_file"
+        install_echo 'Type=Application'           >> "$desktop_file"
+        install_echo 'Name=Aberoth'               >> "$desktop_file"
+        install_echo "Exec=$1 -jar $install_dir/Aberoth.jar" >> "$desktop_file"
+        install_echo "Icon=$install_dir/icon.ico" >> "$desktop_file"
+        install_echo 'Categories=Game'            >> "$desktop_file"
+        install_echo 'Terminal=false'             >> "$desktop_file"
+        install_echo 'Comment=Free 8-Bit MMORPG'  >> "$desktop_file"
+        chmod +x "$desktop_file"
     }
 
     install_create_windows_menu_shortcut() {
@@ -151,7 +151,7 @@ EOF
     install_dir=~/.aberoth/
     java_8=""
 
-    if [[ ! -z $1 ]]; then
+    if [[ -n "$1" ]]; then
         install_dir="$1/.aberoth/"
     fi
 
@@ -164,24 +164,24 @@ EOF
     locations=(java "$JAVA_HOME/bin/java")
 
     # AdoptOpenJDK locations
-    if [[ "$(echo /usr/lib/jvm/adoptopenjdk-*/bin/java)" != "/usr/lib/jvm/jdk-*/bin/java" ]]; then
-        locations+=("$(echo /usr/lib/jvm/adoptopenjdk-*/bin/java)")
+    if [[ "$(echo /usr/lib/jvm/adoptopenjdk-*/bin/java)" != "/usr/lib/jvm/adoptopenjdk-*/bin/java" ]]; then
+        locations+=($(echo /usr/lib/jvm/adoptopenjdk-*/bin/java))
     fi
 
     # Ubuntu locations
     if [[ "$(echo /usr/lib/jvm/java-*/bin/java)" != "/usr/lib/jvm/java-*/bin/java" ]]; then
-        locations+=("$(echo /usr/lib/jvm/java-*/bin/java)")
+        locations+=($(echo /usr/lib/jvm/java-*/bin/java))
     fi
 
     # Windows locations
     if [[ "$(echo /c/Program\ Files/jre*/bin/javaw.exe)" != '/c/Program Files/jre*/bin/javaw.exe' ]]; then
-        locations+=("$(echo /c/Program\ Files/jre*/bin/javaw.exe)")
+        locations+=($(echo /c/Program\ Files/jre*/bin/javaw.exe))
     elif [[ "$(echo /c/Program\ Files/jdk*/bin/javaw.exe)" != '/c/Program Files/jdk*/bin/javaw.exe' ]]; then
-        locations+=("$(echo /c/Program\ Files/jdk*/bin/javaw.exe)")
+        locations+=($(echo /c/Program\ Files/jdk*/bin/javaw.exe))
     fi
 
     # Loop over locations
-    for p in ${locations[@]}; do
+    for p in "${locations[@]}"; do
         install_is_java_8 "$p" \
             && install_prompt "  + Use Java 8 located at: \"$p\"?" \
             && java_8="$p" \
@@ -199,9 +199,9 @@ EOF
     fi
 
     # Start install
-    mkdir -p $install_dir && cd $install_dir \
-        && install_download_client "$installdiraberoth" \
-        && install_download_icon "$installdiraberoth" \
+    mkdir -p "$install_dir" && cd "$install_dir" \
+        && install_download_client \
+        && install_download_icon \
         && install_create_menu_shortcut "$java_8" \
         && install_echo "  - Done!"
 }
